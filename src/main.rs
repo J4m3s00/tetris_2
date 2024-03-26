@@ -1,3 +1,5 @@
+use solve::solve;
+
 use crate::{board::Board, piece::Piece};
 
 /// The coords will always be between 0 and 7
@@ -39,23 +41,15 @@ mod piece;
 mod solve;
 
 fn main() {
-    let test_piece = Piece::new(
-        1,
-        vec![
-            Position::new(1, 0),
-            Position::new(0, 1),
-            Position::new(1, 1),
-            Position::new(1, 2),
-            Position::new(2, 2),
-        ],
-    );
-    let mut board = Board::default();
-    board.place_piece(Position::new(0, 0), &test_piece);
-    board.place_piece(Position::new(0, 4), &test_piece.rotate_ccw());
-    board.place_piece(Position::new(4, 0), &test_piece.rotate_180());
-    board.place_piece(Position::new(4, 4), &test_piece.rotate_cw());
+    let pieces = get_game_pieces();
+    let board = Board::default();
 
-    println!("{board}");
+    match solve(&board, &pieces) {
+        solve::SolveResult::ToManyTries => println!("Took to many steps to solve the puzzle"),
+        solve::SolveResult::NoMorePieces => println!("No more pieces!"),
+        solve::SolveResult::NotSolvable(b) => println!("Board was not solvable. Last state:\n{b}"),
+        solve::SolveResult::Solved(b) => println!("Board solved!\n{b}"),
+    }
 }
 
 fn get_game_pieces() -> Vec<Piece> {

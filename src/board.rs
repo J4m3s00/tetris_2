@@ -53,10 +53,11 @@ impl Board {
             write!(
                 f,
                 " {} |",
-                if self.get_value(Position::new(x, y)) == 0 {
-                    "X"
-                } else {
-                    " "
+                match self.get_value(Position::new(x, y)) {
+                    0 => ' ',
+                    v => {
+                        (('A' as u8) + v) as u8 as char
+                    }
                 }
             )?;
         }
