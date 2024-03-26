@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::Position;
 
 /// +---+---+---+---+       +---+---+---+---+
@@ -57,7 +59,7 @@ use crate::Position;
 /// [(1, 0), (0, 1),    [(2, 1), (1, 0),    [(0, 1), (1, 2),    [(1, 2), (2, 1),
 ///  (1, 1), (1, 2),     (1, 1), (0, 1),     (1, 1), (2, 1),     (1, 1), (1, 0),
 ///  (2, 2)]             (0, 2)]             (2, 0)]             (0, 0)]
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Piece {
     id: u8,
     points: Vec<Position>,
@@ -65,6 +67,7 @@ pub struct Piece {
 
 impl Piece {
     pub fn new(id: u8, points: Vec<Position>) -> Self {
+        assert_ne!(id, 0);
         Self { id, points }
     }
 
@@ -131,14 +134,27 @@ impl Piece {
     }
 
     pub fn get_all_transforms(&self) -> Vec<Self> {
-        vec![
+        let all = vec![
             self.clone(),
             self.rotate_cw(),
             self.rotate_180(),
             self.rotate_ccw(),
             self.flip_x(),
+            self.flip_x().rotate_cw(),
+            self.flip_x().rotate_180(),
+            self.flip_x().rotate_ccw(),
             self.flip_y(),
-        ]
+            self.flip_y().rotate_cw(),
+            self.flip_y().rotate_180(),
+            self.flip_y().rotate_ccw(),
+        ];
+        let mut res: Vec<Piece> = Vec::new();
+        for item in all {
+            if res.iter().find(|f| (**f).points == item.points).is_none() {
+                res.push(item);
+            }
+        }
+        res
     }
 
     /// Transform the points and place them back in the unsigned space.
@@ -155,12 +171,56 @@ impl Piece {
             (x_offset, y_offset)
         });
 
+        let mut points = flipped_signed_points
+            .into_iter()
+            .map(|(x, y)| Position::new((x + offset_x) as u8, (y + offset_y) as u8))
+            .collect::<Vec<_>>();
+        points.sort();
+
         Self {
             id: self.id,
-            points: flipped_signed_points
-                .into_iter()
-                .map(|(x, y)| Position::new((x + offset_x) as u8, (y + offset_y) as u8))
-                .collect(),
+            points,
         }
+    }
+
+    fn bounds(&self) -> (u8, u8) {
+        self.points.iter().fold((0, 0), |(w, h), point| {
+            (w.max(point.x + 1), h.max(point.y + 1))
+        })
+    }
+
+    fn check_point(&self, point: Position) -> bool {
+        self.points.iter().find(|p| *p == &point).is_some()
+    }
+}
+
+impl Display for Piece {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let bounds = self.bounds();
+        for _ in 0..bounds.0 {
+            write!(f, "+---")?;
+        }
+        writeln!(f, "+")?;
+
+        for y in 0..bounds.1 {
+            for x in 0..bounds.0 {
+                write!(
+                    f,
+                    "| {} ",
+                    if self.check_point(Position::new(x, y)) {
+                        "X"
+                    } else {
+                        " "
+                    }
+                )?;
+            }
+            writeln!(f, "|")?;
+            for _ in 0..bounds.0 {
+                write!(f, "+---")?;
+            }
+            writeln!(f, "+")?;
+        }
+
+        Ok(())
     }
 }

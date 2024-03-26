@@ -3,7 +3,7 @@ use solve::{dumb_solver::DumbSolver, solve};
 use crate::{board::Board, piece::Piece};
 
 /// The coords will always be between 0 and 7
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Position {
     x: u8,
     y: u8,
@@ -34,6 +34,12 @@ impl Position {
             None
         }
     }
+
+    pub fn offset(&self, offset: (i8, i8)) -> (i8, i8) {
+        let x = self.x as i8;
+        let y = self.y as i8;
+        (x + offset.0, y + offset.1)
+    }
 }
 
 mod board;
@@ -41,12 +47,15 @@ mod piece;
 mod solve;
 
 fn main() {
-    let pieces = get_game_pieces();
+    let mut pieces = get_game_pieces()
+        .iter()
+        .map(|p| p.get_all_transforms())
+        .collect::<Vec<_>>();
     let board = Board::default();
 
     match solve(DumbSolver, &board, &pieces) {
         solve::SolveResult::NoMorePieces => println!("No more pieces!"),
-        solve::SolveResult::NotSolvable(b) => println!("Board was not solvable. Last state:\n{b}"),
+        solve::SolveResult::NotSolvable => println!("Board was not solvable."),
         solve::SolveResult::Solved(b) => println!("Board solved!\n{b}"),
     }
 }
