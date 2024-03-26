@@ -1,4 +1,4 @@
-use crate::{board::Board, piece::Piece, Position};
+use crate::{board::Board, piece::Piece};
 
 pub enum SolveResult {
     ToManyTries,
@@ -7,7 +7,7 @@ pub enum SolveResult {
     Solved(Board),
 }
 
-trait Solvable {
+pub trait Solvable {
     fn solve(&self, board: &Board, pieces: &[Piece]) -> SolveResult;
 }
 
