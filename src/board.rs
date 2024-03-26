@@ -14,6 +14,10 @@ impl Default for Board {
 }
 
 impl Board {
+    pub fn is_solved(&self) -> bool {
+        self.0.iter().all(|v| *v != 0)
+    }
+
     pub fn get_value(&self, pos: Position) -> u8 {
         let index = pos.y() * 8 + pos.x();
         self.0.get(index as usize).cloned().unwrap_or(0u8)
@@ -56,7 +60,7 @@ impl Board {
                 match self.get_value(Position::new(x, y)) {
                     0 => ' ',
                     v => {
-                        (('A' as u8) + v) as u8 as char
+                        (('A' as u8) + (v - 1)) as u8 as char
                     }
                 }
             )?;
