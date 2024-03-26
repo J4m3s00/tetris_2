@@ -1,4 +1,4 @@
-use solve::solve;
+use solve::{dumb_solver::DumbSolver, solve};
 
 use crate::{board::Board, piece::Piece};
 
@@ -44,7 +44,7 @@ fn main() {
     let pieces = get_game_pieces();
     let board = Board::default();
 
-    match solve(&board, &pieces) {
+    match solve(DumbSolver, &board, &pieces) {
         solve::SolveResult::ToManyTries => println!("Took to many steps to solve the puzzle"),
         solve::SolveResult::NoMorePieces => println!("No more pieces!"),
         solve::SolveResult::NotSolvable(b) => println!("Board was not solvable. Last state:\n{b}"),
