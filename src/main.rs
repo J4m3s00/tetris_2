@@ -45,7 +45,6 @@ fn main() {
     let board = Board::default();
 
     match solve(DumbSolver, &board, &pieces) {
-        solve::SolveResult::ToManyTries => println!("Took to many steps to solve the puzzle"),
         solve::SolveResult::NoMorePieces => println!("No more pieces!"),
         solve::SolveResult::NotSolvable(b) => println!("Board was not solvable. Last state:\n{b}"),
         solve::SolveResult::Solved(b) => println!("Board solved!\n{b}"),
