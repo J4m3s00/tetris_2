@@ -1,6 +1,7 @@
 use solve::{dumb_solver::DumbSolver, solve};
 
 use crate::{board::Board, piece::Piece};
+use rand::seq::SliceRandom;
 
 /// The coords will always be between 0 and 7
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -52,6 +53,9 @@ fn main() {
         .map(|p| p.get_all_transforms())
         .collect::<Vec<_>>();
     let board = Board::default();
+
+    let mut rng = rand::thread_rng();
+    pieces.shuffle(&mut rng);
 
     match solve(DumbSolver, &board, &pieces) {
         solve::SolveResult::NoMorePieces => println!("No more pieces!"),
