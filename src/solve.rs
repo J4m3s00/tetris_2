@@ -1,7 +1,6 @@
 use crate::{board::Board, piece::Piece, Position};
 
 pub enum SolveResult {
-    ToManyTries,
     NoMorePieces,
     NotSolvable(Board),
     Solved(Board),

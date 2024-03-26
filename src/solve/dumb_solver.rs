@@ -10,14 +10,11 @@ impl Solvable for DumbSolver {
         board: &crate::board::Board,
         pieces: &[crate::piece::Piece],
     ) -> super::SolveResult {
-        step(board, pieces, 100)
+        step(board, pieces)
     }
 }
 
-pub fn step(board: &Board, pieces: &[Piece], possible_depth: u32) -> SolveResult {
-    if possible_depth == 0 {
-        return SolveResult::ToManyTries;
-    }
+pub fn step(board: &Board, pieces: &[Piece]) -> SolveResult {
     if pieces.is_empty() {
         return SolveResult::NoMorePieces;
     }
@@ -32,9 +29,7 @@ pub fn step(board: &Board, pieces: &[Piece], possible_depth: u32) -> SolveResult
                     let mut board_clone = board.clone();
                     board_clone.place_piece(pos, piece);
                     //println!("Checking board:\n{board_clone}");
-                    if let SolveResult::Solved(finished) =
-                        step(&board_clone, &pieces[1..], possible_depth - 1)
-                    {
+                    if let SolveResult::Solved(finished) = step(&board_clone, &pieces[1..]) {
                         return SolveResult::Solved(finished);
                     }
                 }
