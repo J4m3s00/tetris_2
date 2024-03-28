@@ -2,8 +2,14 @@ use std::fmt::Display;
 
 use crate::{board::Board, piece::Piece};
 
+pub mod dumb_solver;
+mod empty_solver;
+
 pub type SolveResult<T> = Result<Board, T>;
 
+/// Trait for a solvable
+/// Impl this type to invoke solve with it.
+/// It should return a single solved board or an error if it is not solvable
 pub trait Solvable {
     type SolveStats: Default + Display;
     type Failure: Display;
@@ -16,8 +22,7 @@ pub trait Solvable {
     ) -> SolveResult<Self::Failure>;
 }
 
-pub mod dumb_solver;
-
+/// Solves the board with an provided Solvable
 pub fn solve<S: Solvable>(
     solver: S,
     board: &Board,
