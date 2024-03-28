@@ -22,13 +22,13 @@ impl Board {
         self.0.iter().all(|v| *v != 0)
     }
 
-    pub fn get_value(&self, pos: Position) -> u8 {
-        let index = pos.y() * 8 + pos.x();
+    pub fn get_value(&self, position: Position) -> u8 {
+        let index = position.y() * 8 + position.x();
         self.0.get(index as usize).cloned().unwrap_or(0u8)
     }
 
-    pub fn set_value(&mut self, pos: Position, new_value: u8) {
-        let index = pos.y() * 8 + pos.x();
+    pub fn set_value(&mut self, position: Position, new_value: u8) {
+        let index = position.y() * 8 + position.x();
         if let Some(val) = self.0.get_mut(index as usize) {
             *val = new_value;
         }
@@ -92,5 +92,94 @@ impl Display for Board {
         writeln!(f, "+---+---+---+---+---+---+---+---+")?;
         self.fmt_line(f, 7)?;
         writeln!(f, "+---+---+---+---+---+---+---+---+")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{piece::Piece, position::Position};
+
+    use super::Board;
+
+    #[test]
+    fn get_set_value() {
+        let mut board = Board::default();
+        board.set_value(Position::new(4, 4), 32);
+        assert_eq!(
+            board.get_value(Position::new(4, 4)),
+            32,
+            "Found the value we just set"
+        )
+    }
+
+    #[test]
+    fn is_solved() {
+        let mut board = Board::default();
+        for y in 0..8 {
+            for x in 0..8 {
+                let position = Position::new(x, y);
+                board.set_value(position, 1);
+            }
+        }
+        assert!(board.is_solved(), "Board not solved");
+    }
+
+    #[test]
+    fn place_piece() {
+        // +---+---+---+---+
+        // | X | X | X |   |
+        // +---+---+---+---+
+        // | X |   |   | X |
+        // +---+---+---+---+
+        // | X | X | X |   |
+        // +---+---+---+---+
+
+        let piece = Piece::new(
+            1,
+            vec![
+                Position::new(0, 0),
+                Position::new(1, 0),
+                Position::new(2, 0),
+                Position::new(0, 1),
+                Position::new(3, 1),
+                Position::new(0, 2),
+                Position::new(1, 2),
+                Position::new(2, 2),
+            ],
+        );
+
+        {
+            test_single_piece_place(Board::default(), &piece, Position::new(0, 0));
+        }
+        {
+            test_single_piece_place(Board::default(), &piece, Position::new(3, 3));
+        }
+        {
+            let mut board = Board::default();
+            board.set_value(Position::new(3, 0), 2);
+            board.set_value(Position::new(1, 1), 2);
+            board.set_value(Position::new(2, 1), 2);
+            board.set_value(Position::new(3, 2), 2);
+            test_single_piece_place(board, &piece, Position::new(0, 0));
+        }
+        {
+            let mut board = Board::default();
+            board.set_value(Position::new(0, 1), 2);
+            assert!(!board.can_place_piece(Position::new(0, 0), &piece));
+        }
+    }
+
+    fn test_single_piece_place(mut board: Board, piece: &Piece, position: Position) {
+        board.place_piece(position, &piece);
+        for p in piece.points() {
+            assert_eq!(
+                board.get_value(
+                    position
+                        .try_add(p)
+                        .expect("Failed to get position of piece point")
+                ),
+                1
+            );
+        }
     }
 }
