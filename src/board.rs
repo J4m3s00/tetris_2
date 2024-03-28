@@ -69,7 +69,7 @@ impl Board {
                 }
             )?;
         }
-        writeln!(f)
+        writeln!(f, "")
     }
 }
 
