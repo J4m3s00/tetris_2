@@ -2,9 +2,11 @@ use std::fmt::Display;
 
 use crate::{piece::Piece, Position};
 
+pub type BoardID = u64;
+
 /// The board has 8x8 fields.
 /// Every field is a u8 to store an id for the current piece on the board
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Hash)]
 pub struct Board([u8; 64]);
 
 impl Default for Board {
@@ -14,6 +16,10 @@ impl Default for Board {
 }
 
 impl Board {
+    pub fn as_slice(&self) -> &[u8; 64] {
+        &self.0
+    }
+
     pub fn is_solved(&self) -> bool {
         self.0.iter().all(|v| *v != 0)
     }

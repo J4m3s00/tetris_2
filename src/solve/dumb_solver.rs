@@ -1,21 +1,34 @@
-use crate::{board::Board, piece::Piece, Position};
+use crate::{
+    board::{Board, BoardID},
+    piece::Piece,
+    Position,
+};
 
-use super::{Solvable, SolveResult};
+use super::{Solvable, SolveResult, SolveStats};
 
 pub struct DumbSolver;
 
 impl Solvable for DumbSolver {
     fn solve(
         &self,
+        stats: &mut SolveStats,
         board: &crate::board::Board,
         pieces: &[Vec<crate::piece::Piece>],
     ) -> super::SolveResult {
-        step(board, pieces, 0)
+        let root = stats.insert_board(None, board.clone());
+        step(stats, board, pieces, 0, root)
     }
 }
 
-pub fn step(board: &Board, pieces: &[Vec<Piece>], depth: u16) -> SolveResult {
+pub fn step(
+    stats: &mut SolveStats,
+    board: &Board,
+    pieces: &[Vec<Piece>],
+    depth: u16,
+    parent: BoardID,
+) -> SolveResult {
     if pieces.is_empty() {
+        println!("Empty!");
         return SolveResult::NoMorePieces;
     }
     let all_transforms = &pieces[0];
@@ -28,17 +41,19 @@ pub fn step(board: &Board, pieces: &[Vec<Piece>], depth: u16) -> SolveResult {
                 if board.can_place_piece(pos, piece) {
                     let mut board_clone = board.clone();
                     board_clone.place_piece(pos, piece);
+                    let new_parent = stats.insert_board(Some(parent.clone()), board_clone);
                     if has_single_cells(&board_clone) {
+                        stats.num_skiped_single += 1;
                         continue;
                     }
-                    if depth == 3 {
+                    if depth == 4 {
                         println!("{board_clone}");
                     }
                     if board_clone.is_solved() {
                         return SolveResult::Solved(board_clone.clone());
                     }
                     if let SolveResult::Solved(finished) =
-                        step(&board_clone, &pieces[1..], depth + 1)
+                        step(stats, &board_clone, &pieces[1..], depth + 1, new_parent)
                     {
                         return SolveResult::Solved(finished);
                     }

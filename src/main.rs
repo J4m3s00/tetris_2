@@ -1,7 +1,6 @@
 use solve::{dumb_solver::DumbSolver, solve};
 
 use crate::{board::Board, piece::Piece};
-use rand::seq::SliceRandom;
 
 /// The coords will always be between 0 and 7
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -43,7 +42,7 @@ impl Position {
     }
 }
 
-mod board;
+pub mod board;
 mod piece;
 mod solve;
 
@@ -54,14 +53,18 @@ fn main() {
         .collect::<Vec<_>>();
     let board = Board::default();
 
-    let mut rng = rand::thread_rng();
-    pieces.shuffle(&mut rng);
+    //let mut rng = rand::thread_rng();
+    //pieces.shuffle(&mut rng);
 
-    match solve(DumbSolver, &board, &pieces) {
+    let (solve_result, stats) = solve(DumbSolver, &board, &pieces);
+    match solve_result {
         solve::SolveResult::NoMorePieces => println!("No more pieces!"),
         solve::SolveResult::NotSolvable => println!("Board was not solvable."),
         solve::SolveResult::Solved(b) => println!("Board solved!\n{b}"),
     }
+
+    println!("Checked boards: {}", stats.num_checked_boards);
+    println!("Skiped single fields: {}", stats.num_skiped_single);
 }
 
 fn get_game_pieces() -> Vec<Piece> {
