@@ -150,7 +150,7 @@ impl Piece {
         ];
         let mut res: Vec<Piece> = Vec::new();
         for item in all {
-            if res.iter().find(|f| (**f).points == item.points).is_none() {
+            if !res.iter().any(|f| f.points == item.points) {
                 res.push(item);
             }
         }
@@ -185,12 +185,12 @@ impl Piece {
 
     fn bounds(&self) -> (u8, u8) {
         self.points.iter().fold((0, 0), |(w, h), point| {
-            (w.max(point.x + 1), h.max(point.y + 1))
+            (w.max(point.x() + 1), h.max(point.y() + 1))
         })
     }
 
     fn check_point(&self, point: Position) -> bool {
-        self.points.iter().find(|p| *p == &point).is_some()
+        self.points.iter().any(|p| p == &point)
     }
 }
 
