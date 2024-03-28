@@ -14,19 +14,24 @@ impl Default for Board {
 }
 
 impl Board {
+    /// Gets the raw data of the board
     pub fn as_slice(&self) -> &[u8; 64] {
         &self.0
     }
 
+    /// Return true if all fields are set to some value
     pub fn is_solved(&self) -> bool {
         self.0.iter().all(|v| *v != 0)
     }
 
+    /// Gets the value at a given position
     pub fn get_value(&self, position: Position) -> u8 {
         let index = position.y() * 8 + position.x();
         self.0.get(index as usize).cloned().unwrap_or(0u8)
     }
 
+    /// Sets the value of a given position to new_value.
+    /// This will override the old value
     pub fn set_value(&mut self, position: Position, new_value: u8) {
         let index = position.y() * 8 + position.x();
         if let Some(val) = self.0.get_mut(index as usize) {
@@ -34,6 +39,9 @@ impl Board {
         }
     }
 
+    /// Places a piece at a given offset.
+    ///
+    /// If the piece is not able to be placed at that position it will cancel.
     pub fn place_piece(&mut self, top_left: Position, piece: &Piece) {
         if self.can_place_piece(top_left, piece) {
             for point in piece.points() {
@@ -45,6 +53,7 @@ impl Board {
         }
     }
 
+    /// Check if a piece can be placed at a given positions
     pub fn can_place_piece(&self, top_left: Position, piece: &Piece) -> bool {
         piece
             .points()
@@ -55,6 +64,7 @@ impl Board {
             })
     }
 
+    /// Prints a single line of the data
     fn fmt_line(&self, f: &mut std::fmt::Formatter<'_>, y: u8) -> std::fmt::Result {
         write!(f, "|")?;
         for x in 0..8 {
