@@ -1,53 +1,15 @@
 use solve::{dumb_solver::DumbSolver, solve};
 
-use crate::{board::Board, piece::Piece};
-
-/// The coords will always be between 0 and 7
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Position {
-    x: u8,
-    y: u8,
-}
-
-impl Position {
-    pub fn new(x: u8, y: u8) -> Self {
-        assert!(x < 8);
-        assert!(y < 8);
-
-        Self { x, y }
-    }
-
-    pub fn x(&self) -> u8 {
-        self.x
-    }
-
-    pub fn y(&self) -> u8 {
-        self.y
-    }
-
-    pub fn try_add(&self, other: &Self) -> Option<Self> {
-        let x = self.x + other.x;
-        let y = self.y + other.y;
-        if x < 8 && y < 8 {
-            Some(Position { x, y })
-        } else {
-            None
-        }
-    }
-
-    pub fn offset(&self, offset: (i8, i8)) -> (i8, i8) {
-        let x = self.x as i8;
-        let y = self.y as i8;
-        (x + offset.0, y + offset.1)
-    }
-}
+use crate::{board::Board, piece::Piece, position::Position};
 
 pub mod board;
+pub mod board_tree;
 mod piece;
+pub mod position;
 mod solve;
 
 fn main() {
-    let mut pieces = get_game_pieces()
+    let pieces = get_game_pieces()
         .iter()
         .map(|p| p.get_all_transforms())
         .collect::<Vec<_>>();
@@ -58,13 +20,11 @@ fn main() {
 
     let (solve_result, stats) = solve(DumbSolver, &board, &pieces);
     match solve_result {
-        solve::SolveResult::NoMorePieces => println!("No more pieces!"),
-        solve::SolveResult::NotSolvable => println!("Board was not solvable."),
-        solve::SolveResult::Solved(b) => println!("Board solved!\n{b}"),
+        Ok(b) => println!("Board solved!\n{b}"),
+        Err(f) => println!("{f}"),
     }
 
-    println!("Checked boards: {}", stats.num_checked_boards);
-    println!("Skiped single fields: {}", stats.num_skiped_single);
+    println!("{stats}");
 }
 
 fn get_game_pieces() -> Vec<Piece> {

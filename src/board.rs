@@ -2,8 +2,6 @@ use std::fmt::Display;
 
 use crate::{piece::Piece, Position};
 
-pub type BoardID = u64;
-
 /// The board has 8x8 fields.
 /// Every field is a u8 to store an id for the current piece on the board
 #[derive(Debug, Clone, Copy, Hash)]
@@ -66,12 +64,12 @@ impl Board {
                 match self.get_value(Position::new(x, y)) {
                     0 => ' ',
                     v => {
-                        (('A' as u8) + (v - 1)) as u8 as char
+                        (b'A' + (v - 1)) as char
                     }
                 }
             )?;
         }
-        writeln!(f, "")
+        writeln!(f)
     }
 }
 
